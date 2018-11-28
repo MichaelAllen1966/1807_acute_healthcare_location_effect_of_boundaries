@@ -555,13 +555,18 @@ class Pop():
             parents = np.vstack((self.population[parent1_ID], self.population[parent2_ID]))
             children = self.crossover(parents, maximum_crossovers)
             child_population = np.vstack((child_population, children))
+        
         # Apply random mutation
-        random_mutation_array = np.random.random(size=(child_population.shape[0], hospital_count))
-        random_mutation_array[random_mutation_array <= mutation] = 1  # set all values not to be mutated to 1
-        random_mutation_array[random_mutation_array < 1] = 0  # set all other values to zero
-        child_population = (1 - random_mutation_array) * child_population + (
-                random_mutation_array * (
-                1 - child_population))  # Inverts zero or one when mutation array value is one
+        random_mutation_array = np.random.random(
+            size=(child_population.shape))
+        
+        random_mutation_boolean = \
+            random_mutation_array <= mutation
+
+        child_population[random_mutation_boolean] = \
+            np.logical_not(child_population[random_mutation_boolean])
+	
+	    # Fix hospital status if required
         if fix_hospitals:
             child_population = self.fix_hospital_status(hospitals, child_population)
         # Remove any rows with no hospitals
